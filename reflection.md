@@ -2,22 +2,22 @@
 
 ## 1. System Design
 
-### **a. Initial design**
+### a. Initial design
 
 My initial UML design included four main classes: **Owner**, **Pet**, **Task**, and **Scheduler**.  
 Each class represented a real‑world entity in the pet‑care domain:
 
-- **Task** handled all information about a scheduled activity, including description, date, time, frequency, priority, and completion status.  
+- **Task** handled all information about a scheduled activity, including description, date, time, frequency, and completion status.  
 - **Pet** stored basic pet information and maintained a list of tasks.  
 - **Owner** acted as the top‑level container for multiple pets and provided access to all tasks across the household.  
 - **Scheduler** was responsible for algorithmic logic such as sorting, filtering, retrieving today’s tasks, and detecting conflicts.
 
 The UML diagram showed clear “has‑a” relationships: Owners have Pets, Pets have Tasks, and the Scheduler reads tasks from the Owner. This structure helped me keep responsibilities clean and modular.
 
-### **b. Design changes**
+### b. Design changes
 
 My design evolved during implementation.  
-One major change was **adding real `datetime.date` and `datetime.time` objects** to the Task class instead of simple strings. This made sorting, recurrence, and conflict detection far more reliable and “smart.” I also added a **priority** attribute to support advanced scheduling later.
+I used a real `datetime.date` object on the `Task` class instead of just strings, and I kept time in a `"HH:MM"` string format that I convert with `datetime.strptime` when sorting and checking schedules. This made sorting, recurrence, and conflict detection more robust while keeping the code simple. I also thought about adding a `priority` field but decided to leave that for a future iteration so I could keep the core scheduler focused and easy to test.
 
 These changes improved the realism and extensibility of the system, and they aligned better with the project’s goal of building an intelligent scheduler.
 
@@ -25,19 +25,18 @@ These changes improved the realism and extensibility of the system, and they ali
 
 ## 2. Scheduling Logic and Tradeoffs
 
-### **a. Constraints and priorities**
+### a. Constraints and priorities
 
 My scheduler considers several constraints:
 
-- **Time** — tasks are sorted chronologically using real `datetime.time` objects.  
+- **Time** — tasks are sorted chronologically using `datetime.strptime` on the `"HH:MM"` time string.  
 - **Date** — only tasks scheduled for today appear in the daily schedule.  
-- **Priority** — tasks can be labeled Low, Medium, or High.  
 - **Frequency** — daily and weekly tasks automatically generate their next occurrence.  
 - **Conflicts** — tasks with the same date and time are flagged.
 
 I prioritized **time and date** first because they are essential for a functional schedule. Recurrence and conflict detection came next because they add intelligence without overwhelming complexity.
 
-### **b. Tradeoffs**
+### b. Tradeoffs
 
 One tradeoff is that **conflict detection only checks for exact time matches**, not overlapping durations.  
 For example, a 30‑minute walk at 8:00 AM and a grooming appointment at 8:15 AM would not be flagged.
@@ -48,7 +47,7 @@ This tradeoff is reasonable because the project focuses on discrete tasks rather
 
 ## 3. AI Collaboration
 
-### **a. How you used AI**
+### a. How you used AI
 
 I used AI throughout the project in several ways:
 
@@ -63,10 +62,10 @@ The most helpful prompts were specific ones like:
 and  
 *“Suggest a clean way to implement daily recurrence using timedelta.”*
 
-### **b. Judgment and verification**
+### b. Judgment and verification
 
 There were several moments where I didn’t accept AI suggestions immediately.  
-For example, one suggestion used string‑based time sorting instead of real `datetime.time` objects. I rejected it because it would break once I added recurrence and conflict detection.
+For example, one suggestion used string‑based time sorting without converting to `datetime`, which would be fragile once I added recurrence and conflict detection.
 
 To verify suggestions, I:
 
@@ -80,7 +79,7 @@ This helped me stay in control of the architecture rather than letting the AI di
 
 ## 4. Testing and Verification
 
-### **a. What you tested**
+### a. What you tested
 
 I tested several core behaviors:
 
@@ -91,7 +90,7 @@ I tested several core behaviors:
 
 These tests were important because they validated the “smart” parts of the scheduler — the parts most likely to break if logic changes.
 
-### **b. Confidence**
+### b. Confidence
 
 I am confident that the scheduler works correctly for the project’s intended use cases.  
 The tests cover the essential behaviors, and the CLI demo plus Streamlit UI both confirm that the logic behaves as expected.
@@ -99,7 +98,7 @@ The tests cover the essential behaviors, and the CLI demo plus Streamlit UI both
 If I had more time, I would test:
 
 - Weekly recurrence  
-- Priority‑based sorting  
+- Priority‑based sorting (after adding a priority field)  
 - Edge cases like invalid times or missing data  
 - JSON persistence (if implemented)
 
@@ -107,14 +106,14 @@ If I had more time, I would test:
 
 ## 5. Reflection
 
-### **a. What went well**
+### a. What went well
 
 I’m most satisfied with the **clean separation between logic and UI**.  
 Building the backend first in a CLI environment made the system easier to debug and ensured the Streamlit UI stayed simple and focused.
 
 I’m also proud of the recurrence and conflict detection logic — they make the app feel genuinely intelligent.
 
-### **b. What you would improve**
+### b. What you would improve
 
 If I had another iteration, I would:
 
@@ -123,7 +122,7 @@ If I had another iteration, I would:
 - Improve the UI with color‑coded priorities and better task tables  
 - Add support for multiple days instead of only “today”
 
-### **c. Key takeaway**
+### c. Key takeaway
 
 The biggest thing I learned is that **AI is a powerful collaborator, but not a replacement for architectural thinking**.  
 AI can generate code quickly, but it’s up to me to decide what belongs in each class, how data should flow, and which algorithms make sense.  
