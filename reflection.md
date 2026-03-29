@@ -2,70 +2,177 @@
 
 ## 1. System Design
 
-**a. Initial design**
+### **a. Initial design**
 
-- Briefly describe your initial UML design.
-- What classes did you include, and what responsibilities did you assign to each?
+My initial UML design included four main classes: **Owner**, **Pet**, **Task**, and **Scheduler**.  
+Each class represented a real‑world entity in the pet‑care domain:
 
-**b. Design changes**
+- **Task** handled all information about a scheduled activity, including description, date, time, frequency, priority, and completion status.  
+- **Pet** stored basic pet information and maintained a list of tasks.  
+- **Owner** acted as the top‑level container for multiple pets and provided access to all tasks across the household.  
+- **Scheduler** was responsible for algorithmic logic such as sorting, filtering, retrieving today’s tasks, and detecting conflicts.
 
-- Did your design change during implementation?
-- If yes, describe at least one change and why you made it.
+The UML diagram showed clear “has‑a” relationships: Owners have Pets, Pets have Tasks, and the Scheduler reads tasks from the Owner. This structure helped me keep responsibilities clean and modular.
+
+### **b. Design changes**
+
+My design evolved during implementation.  
+One major change was **adding real `datetime.date` and `datetime.time` objects** to the Task class instead of simple strings. This made sorting, recurrence, and conflict detection far more reliable and “smart.” I also added a **priority** attribute to support advanced scheduling later.
+
+These changes improved the realism and extensibility of the system, and they aligned better with the project’s goal of building an intelligent scheduler.
 
 ---
 
 ## 2. Scheduling Logic and Tradeoffs
 
-**a. Constraints and priorities**
+### **a. Constraints and priorities**
 
-- What constraints does your scheduler consider (for example: time, priority, preferences)?
-- How did you decide which constraints mattered most?
+My scheduler considers several constraints:
 
-**b. Tradeoffs**
+- **Time** — tasks are sorted chronologically using real `datetime.time` objects.  
+- **Date** — only tasks scheduled for today appear in the daily schedule.  
+- **Priority** — tasks can be labeled Low, Medium, or High.  
+- **Frequency** — daily and weekly tasks automatically generate their next occurrence.  
+- **Conflicts** — tasks with the same date and time are flagged.
 
-- Describe one tradeoff your scheduler makes.
-- Why is that tradeoff reasonable for this scenario?
+I prioritized **time and date** first because they are essential for a functional schedule. Recurrence and conflict detection came next because they add intelligence without overwhelming complexity.
+
+### **b. Tradeoffs**
+
+One tradeoff is that **conflict detection only checks for exact time matches**, not overlapping durations.  
+For example, a 30‑minute walk at 8:00 AM and a grooming appointment at 8:15 AM would not be flagged.
+
+This tradeoff is reasonable because the project focuses on discrete tasks rather than continuous events. Adding duration‑based conflict detection would require more attributes and more complex logic than the scope requires.
 
 ---
 
 ## 3. AI Collaboration
 
-**a. How you used AI**
+### **a. How you used AI**
 
-- How did you use AI tools during this project (for example: design brainstorming, debugging, refactoring)?
-- What kinds of prompts or questions were most helpful?
+I used AI throughout the project in several ways:
 
-**b. Judgment and verification**
+- **Design brainstorming:** generating UML diagrams and refining class responsibilities.  
+- **Implementation:** scaffolding class skeletons, writing method stubs, and filling in logic.  
+- **Debugging:** asking why certain tests failed and how to fix them.  
+- **Refactoring:** improving readability and making code more Pythonic.  
+- **Algorithm design:** comparing different approaches for sorting, recurrence, and conflict detection.
 
-- Describe one moment where you did not accept an AI suggestion as-is.
-- How did you evaluate or verify what the AI suggested?
+The most helpful prompts were specific ones like:  
+*“How should the Scheduler retrieve all tasks from the Owner’s pets?”*  
+and  
+*“Suggest a clean way to implement daily recurrence using timedelta.”*
+
+### **b. Judgment and verification**
+
+There were several moments where I didn’t accept AI suggestions immediately.  
+For example, one suggestion used string‑based time sorting instead of real `datetime.time` objects. I rejected it because it would break once I added recurrence and conflict detection.
+
+To verify suggestions, I:
+
+- Ran the code in my CLI demo  
+- Wrote tests to confirm behavior  
+- Checked whether the logic aligned with my UML and design goals  
+
+This helped me stay in control of the architecture rather than letting the AI dictate it.
 
 ---
 
 ## 4. Testing and Verification
 
-**a. What you tested**
+### **a. What you tested**
 
-- What behaviors did you test?
-- Why were these tests important?
+I tested several core behaviors:
 
-**b. Confidence**
+- **Task completion and recurrence** — verifying that daily tasks generate a new task for the next day.  
+- **Sorting** — ensuring tasks appear in correct chronological order.  
+- **Conflict detection** — confirming that tasks with identical times are flagged.  
+- **Task addition** — verifying that adding a task increases a pet’s task list.
 
-- How confident are you that your scheduler works correctly?
-- What edge cases would you test next if you had more time?
+These tests were important because they validated the “smart” parts of the scheduler — the parts most likely to break if logic changes.
+
+### **b. Confidence**
+
+I am confident that the scheduler works correctly for the project’s intended use cases.  
+The tests cover the essential behaviors, and the CLI demo plus Streamlit UI both confirm that the logic behaves as expected.
+
+If I had more time, I would test:
+
+- Weekly recurrence  
+- Priority‑based sorting  
+- Edge cases like invalid times or missing data  
+- JSON persistence (if implemented)
 
 ---
 
 ## 5. Reflection
 
-**a. What went well**
+### **a. What went well**
 
-- What part of this project are you most satisfied with?
+I’m most satisfied with the **clean separation between logic and UI**.  
+Building the backend first in a CLI environment made the system easier to debug and ensured the Streamlit UI stayed simple and focused.
 
-**b. What you would improve**
+I’m also proud of the recurrence and conflict detection logic — they make the app feel genuinely intelligent.
 
-- If you had another iteration, what would you improve or redesign?
+### **b. What you would improve**
 
-**c. Key takeaway**
+If I had another iteration, I would:
 
-- What is one important thing you learned about designing systems or working with AI on this project?
+- Add duration‑based conflict detection  
+- Implement full JSON persistence for saving tasks between sessions  
+- Improve the UI with color‑coded priorities and better task tables  
+- Add support for multiple days instead of only “today”
+
+### **c. Key takeaway**
+
+The biggest thing I learned is that **AI is a powerful collaborator, but not a replacement for architectural thinking**.  
+AI can generate code quickly, but it’s up to me to decide what belongs in each class, how data should flow, and which algorithms make sense.  
+Being the “lead architect” means using AI as a tool — not letting it design the system for me.
+
+## Initial UML
+
+```mermaid
+classDiagram
+    class Task {
+        +description: str
+        +time: str
+        +date: date
+        +frequency: str
+        +completed: bool
+        +pet_name: str
+        +mark_complete()
+        +is_recurring()
+        +next_occurrence()
+    }
+
+    class Pet {
+        +name: str
+        +species: str
+        +age: int
+        +tasks: list
+        +add_task(task)
+        +get_tasks()
+        +get_incomplete_tasks()
+    }
+
+    class Owner {
+        +name: str
+        +pets: list
+        +add_pet(pet)
+        +get_pet(name)
+        +get_all_tasks()
+    }
+
+    class Scheduler {
+        +owner: Owner
+        +get_todays_tasks()
+        +sort_by_time(tasks)
+        +filter_tasks(tasks, pet_name, completed)
+        +detect_conflicts(tasks)
+        +mark_task_complete(task)
+    }
+
+    Owner --> Pet
+    Pet --> Task
+    Scheduler --> Owner
+```
